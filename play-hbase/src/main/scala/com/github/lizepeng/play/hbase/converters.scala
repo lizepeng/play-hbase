@@ -1,11 +1,10 @@
-package play.hbase
+package com.github.lizepeng.play.hbase
 
 import org.apache.hadoop.hbase.util.Bytes
 
 /**
  * @author zepeng.li@gmail.com
  */
-
 trait DoubleConverter {
 
   def decode(bytes: Array[Byte]) = Bytes.toDouble(bytes)

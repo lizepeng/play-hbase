@@ -1,4 +1,4 @@
-package play.syntactic
+package com.github.lizepeng.play.syntactic
 
 /**
  * @author zepeng.li@gmail.com

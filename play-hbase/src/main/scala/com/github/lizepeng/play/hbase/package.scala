@@ -1,11 +1,10 @@
-package play
+package com.github.lizepeng.play
 
 import scala.language.implicitConversions
 import scala.collection.mutable.ListBuffer
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client._
 import org.joda.time._
-import play.api._
 import hbase.implicitConverters._
 
 /**

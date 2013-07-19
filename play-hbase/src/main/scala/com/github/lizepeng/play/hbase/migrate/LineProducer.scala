@@ -1,10 +1,9 @@
-package play.hbase.migrate
+package com.github.lizepeng.play.hbase.migrate
 
 import akka.actor._
 import akka.event.LoggingReceive
-import play.hbase._
-import play.logging._
-import play.syntactic.Sugar._
+import com.github.lizepeng.play.logging._
+import com.github.lizepeng.play.syntactic.Sugar._
 
 /**
  * @author zepeng.li@gmail.com

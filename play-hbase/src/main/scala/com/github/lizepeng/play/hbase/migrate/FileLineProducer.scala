@@ -1,4 +1,4 @@
-package play.hbase.migrate
+package com.github.lizepeng.play.hbase.migrate
 
 import scala.io._
 import java.io.File

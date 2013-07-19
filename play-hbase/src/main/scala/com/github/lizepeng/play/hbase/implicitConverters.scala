@@ -1,4 +1,4 @@
-package play.hbase
+package com.github.lizepeng.play.hbase
 
 import scala.language.implicitConversions
 import org.apache.hadoop.hbase.util.Bytes

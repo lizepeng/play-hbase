@@ -1,4 +1,4 @@
-package play.hbase
+package com.github.lizepeng.play.hbase
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client._

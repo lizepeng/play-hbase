@@ -1,4 +1,4 @@
-package play.hbase.coproc
+package com.github.lizepeng.play.hbase.coproc
 
 import java.io.IOException
 import org.apache.hadoop.hbase.coprocessor._

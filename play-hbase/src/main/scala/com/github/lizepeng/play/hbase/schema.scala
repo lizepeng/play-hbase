@@ -1,10 +1,10 @@
-package play.hbase
+package com.github.lizepeng.play.hbase
 
 import scala.collection.convert.WrapAsScala._
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.KeyValue
 import org.joda.time._
-import play.datetime.Calc._
+import com.github.lizepeng.play.datetime.Calc._
 
 /**
  * @author zepeng.li@gmail.com

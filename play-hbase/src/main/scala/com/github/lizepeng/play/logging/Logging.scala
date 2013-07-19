@@ -1,4 +1,4 @@
-package play.logging
+package com.github.lizepeng.play.logging
 
 import scala.collection.mutable
 import org.joda.time.DateTime

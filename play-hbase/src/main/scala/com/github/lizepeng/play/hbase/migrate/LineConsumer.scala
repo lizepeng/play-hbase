@@ -1,8 +1,7 @@
-package play.hbase.migrate
+package com.github.lizepeng.play.hbase.migrate
 
 import akka.actor._
 import akka.event.LoggingReceive
-import util._
 
 /**
  * @author zepeng.li@gmail.com

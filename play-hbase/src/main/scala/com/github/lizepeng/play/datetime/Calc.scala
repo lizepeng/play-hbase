@@ -1,4 +1,4 @@
-package play.datetime
+package com.github.lizepeng.play.datetime
 
 import scala.language.implicitConversions
 import org.joda.time._
