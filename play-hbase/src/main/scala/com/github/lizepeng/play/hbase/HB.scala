@@ -5,23 +5,43 @@ import org.apache.hadoop.hbase.client._
 import play.api._
 
 /**
- * @author zepeng.li@gmail.com
+ * Provides API for HBase.
  */
 object HB {
   private def error = throw new Exception("HB plugin is not registered.")
 
+  /**
+   * Execute a block of code, providing a HTable instance. The HTable will be
+   * closed after executing the code.
+   *
+   * @param name The table name
+   * @param block Code block to execute
+   */
   def withTable[A](name: String)(block: HTableInterface => A)(implicit app: Application): A = {
     app.plugin[HBPlugin].map(_.api.withTable(name)(block)).getOrElse(error)
   }
 
+  /**
+   * Retrieves the configuration of HBasePlugin under current Application
+   */
   def config(implicit app: Application) = {
     app.plugin[HBPlugin].map(_.api.config).getOrElse(error)
   }
 }
 
+/**
+ * The HBase API which Wrapped HTablePool
+ */
 trait HBApi {
   def pool: HTablePool
 
+  /**
+   * Execute a block of code, providing a HTable instance. The HTable will be
+   * closed after executing the code.
+   *
+   * @param name The table name
+   * @param block Code block to execute
+   */
   def withTable[A](name: String)(block: HTableInterface => A): A = {
     val table = pool.getTable(name)
     try {
@@ -31,10 +51,19 @@ trait HBApi {
     }
   }
 
+  /**
+   * Check if able to connect with hbase master
+   */
   def checkAvailable()
 
+  /**
+   * Retrieves the setting of zookeeper quorum
+   */
   def quorumURL: Option[String]
 
+  /**
+   * Retrieves the configuration of HBasePlugin
+   */
   def config: Configuration
 }
 
@@ -63,10 +92,18 @@ private[hbase] class HBaseApi(conf: Configuration) extends HBApi {
   }
 }
 
+/**
+ * Generic HBPlugin interface
+ */
 trait HBPlugin extends Plugin {
   def api: HBApi
 }
 
+/**
+ * A HBPlugin implementation that provides a HBApi
+ *
+ * @param app the application that is registering the plugin
+ */
 class HBasePlugin(app: Application) extends HBPlugin {
 
   lazy val hbConfig = app.configuration.getConfig("hb").getOrElse(Configuration.empty)

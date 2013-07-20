@@ -44,6 +44,9 @@ trait WColumn[-A] {
 
 import play.api.libs.json._
 
+/**
+ * Use json as the format of a instance saving into HBase.
+ */
 trait JsonRWColumn[A] extends RWColumn[A] {
 
   val defaultValue: A
@@ -71,6 +74,10 @@ abstract case class JsonColumn[A](family: Family, name: String = "") extends Jso
   val jsonColumn = new Column[JsValue](family, name) with JsonConverter
 }
 
+/**
+ * Save time series data as versions of column into HBase.
+ * TS is equal to Time Series.
+ */
 trait TSRColumn[+A] extends RColumn[A] {
   def toDailyData(r: Result): Map[LocalDate, A] = toDailyData(r.kvs(this))
 
