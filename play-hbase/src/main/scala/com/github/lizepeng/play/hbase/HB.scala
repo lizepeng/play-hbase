@@ -14,9 +14,9 @@ object HB {
     app.plugin[HBPlugin].map(_.api.withTable(name)(block)).getOrElse(error)
   }
 
-  def scanCacheSize(implicit app: Application): Int = app.plugin[HBPlugin].map(_.api.scanCacheSize).getOrElse(error)
-
-  def putCacheSize(implicit app: Application): Int = app.plugin[HBPlugin].map(_.api.putCacheSize).getOrElse(error)
+  def config(implicit app: Application) = {
+    app.plugin[HBPlugin].map(_.api.config).getOrElse(error)
+  }
 }
 
 trait HBApi {
@@ -33,11 +33,9 @@ trait HBApi {
 
   def checkAvailable()
 
-  def scanCacheSize: Int
-
-  def putCacheSize: Int
-
   def quorumURL: Option[String]
+
+  def config: Configuration
 }
 
 private[hbase] class HBaseApi(conf: Configuration) extends HBApi {
@@ -53,6 +51,8 @@ private[hbase] class HBaseApi(conf: Configuration) extends HBApi {
     hbConf
   }
 
+  def config = conf
+
   private def buildTablePool = {
     checkAvailable()
     new HTablePool(hbaseConf, conf.getInt("htable.pool.size").getOrElse(256))
@@ -61,10 +61,6 @@ private[hbase] class HBaseApi(conf: Configuration) extends HBApi {
   def checkAvailable() {
     HBaseAdmin.checkHBaseAvailable(hbaseConf)
   }
-
-  def scanCacheSize: Int = conf.getInt("htable.scan.caching").getOrElse(5000)
-
-  def putCacheSize: Int = conf.getInt("htable.put.caching").getOrElse(5000)
 }
 
 trait HBPlugin extends Plugin {

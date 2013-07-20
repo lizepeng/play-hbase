@@ -95,7 +95,7 @@ package object hbase {
     def during(interval: Interval) = scan.setTimeRange(interval.getStartMillis, interval.getEndMillis)
 
     def withCaching(implicit app: play.api.Application): Scan = {
-      withCaching(HB.scanCacheSize)
+      withCaching(HB.config.getInt("htable.scan.caching").getOrElse(5000))
     }
 
     def withCaching(caching: Int): Scan = {
@@ -117,7 +117,7 @@ package object hbase {
 
   implicit class RichResultScanner(val rs: ResultScanner) extends AnyVal {
     def mapEach[A](block: Array[Result] => A)(implicit app: play.api.Application): ListBuffer[A] = {
-      mapEach(HB.putCacheSize)(block)
+      mapEach(HB.config.getInt("htable.put.caching").getOrElse(5000))(block)
     }
 
     def mapEach[A](cacheSize: Int)(block: Array[Result] => A): ListBuffer[A] = {
