@@ -5,12 +5,21 @@ import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.KeyValue
 import org.joda.time._
 import com.github.lizepeng.play.datetime.Calc._
+import play.api.Application
 
 /**
  * @author zepeng.li@gmail.com
  */
 trait RowKey {
   def toBytes: Array[Byte]
+}
+
+trait HBTable {
+  val name: String
+
+  def withHTable[A](block: HTableInterface => A)(implicit app: Application): A = {
+    HB.withHTable(name)(block)
+  }
 }
 
 case class Family(name: String)
@@ -97,4 +106,4 @@ trait TSRColumn[+A] extends RColumn[A] {
 abstract case class TSColumn[A](
   family: Family,
   name: String = ""
-) extends RWColumn[A] with TSRColumn[A]
+  ) extends RWColumn[A] with TSRColumn[A]

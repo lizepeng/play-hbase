@@ -17,8 +17,8 @@ object HB {
    * @param name The table name
    * @param block Code block to execute
    */
-  def withTable[A](name: String)(block: HTableInterface => A)(implicit app: Application): A = {
-    app.plugin[HBPlugin].map(_.api.withTable(name)(block)).getOrElse(error)
+  def withHTable[A](name: String)(block: HTableInterface => A)(implicit app: Application): A = {
+    app.plugin[HBPlugin].map(_.api.withHTable(name)(block)).getOrElse(error)
   }
 
   /**
@@ -42,7 +42,7 @@ trait HBApi {
    * @param name The table name
    * @param block Code block to execute
    */
-  def withTable[A](name: String)(block: HTableInterface => A): A = {
+  def withHTable[A](name: String)(block: HTableInterface => A): A = {
     val table = pool.getTable(name)
     try {
       block(table)
