@@ -18,4 +18,7 @@ libraryDependencies ++= Seq(
       ExclusionRule(organization = "org.jboss.netty")
     ),
   "org.apache.hadoop" % "hadoop-client" % "2.0.0-cdh4.2.0"
+    excludeAll(
+      ExclusionRule(organization = "org.slf4j")
+    )
 )
