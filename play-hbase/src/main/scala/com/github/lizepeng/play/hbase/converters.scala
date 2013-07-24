@@ -61,9 +61,8 @@ trait BytesConverter {
   def toText(v: Array[Byte]) = Bytes.toString(v)
 }
 
-import play.api.libs.json._
-
 trait JsonConverter {
+  import play.api.libs.json._
 
   def decode(bytes: Array[Byte]): JsValue = Json.parse(bytes)
 
