@@ -4,6 +4,7 @@ import scala.language.implicitConversions
 import scala.collection.mutable.ListBuffer
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.fs._
 import org.joda.time._
 import hbase.implicitConverters._
 
@@ -147,6 +148,17 @@ package object hbase {
     def incrementL(row: RowKey, counter: Column[Long], amount: Long): Long = {
       t.incrementColumnValue(row, counter.family, counter, amount)
     }
+  }
+
+  implicit class RichPath(val path: Path) extends AnyVal {
+    def /(child: String) = new Path(path, child)
+
+    def /(child: Path) = new Path(path, child)
+  }
+
+  implicit class RichStringAsPath(val path: String) extends AnyVal {
+
+    def /(child: String) = s"$path${Path.SEPARATOR}$child"
   }
 
 }

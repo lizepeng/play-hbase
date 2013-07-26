@@ -43,7 +43,7 @@ object HDFS {
    * @param path The uri of hdfs file.
    * @param block Code block to execute.
    */
-  def withOutputStream[A](path: String)(block: FSDataOutputStream => A)(implicit app: Application): A = {
+  def withOutputStream[A](path: Path)(block: FSDataOutputStream => A)(implicit app: Application): A = {
     app.plugin[HBPlugin].map(_.hdfs.withOutputStream(path)(block)).getOrElse(error)
   }
 
@@ -51,8 +51,33 @@ object HDFS {
    * Create an OutputStream at the indicated Path
    * @param path The uri of hdfs file.
    */
-  def create(path: String)(implicit app: Application): FSDataOutputStream = {
+  def create(path: Path)(implicit app: Application): FSDataOutputStream = {
     app.plugin[HBPlugin].map(_.hdfs.create(path)).getOrElse(error)
+  }
+
+  /**
+   * Execute a block of code, providing a HDFS file input stream. The stream will be
+   * closed after executing the code.
+   * @param path The path of hdfs file, should be started with /
+   * @param block Code block to execute.
+   */
+  def withInputStream[A](path: Path)(block: FSDataInputStream => A)(implicit app: Application): A = {
+    app.plugin[HBPlugin].map(_.hdfs.withInputStream(path)(block)).getOrElse(error)
+  }
+
+  /**
+   * Create an InputStream at the indicated Path
+   * @param path path of hdfs file.
+   */
+  def open(path: Path)(implicit app: Application): FSDataInputStream = {
+    app.plugin[HBPlugin].map(_.hdfs.open(path)).getOrElse(error)
+  }
+
+  /**
+   * Renames Path src to Path dst.  Can take place on local fs or remote DFS.
+   */
+  def rename(src: Path, dst: Path)(implicit app: Application): Boolean = {
+    app.plugin[HBPlugin].map(_.hdfs.rename(src, dst)).getOrElse(error)
   }
 }
 
@@ -127,16 +152,43 @@ trait HDFSApi {
   /**
    * Execute a block of code, providing a HDFS file output stream. The stream will be
    * closed after executing the code.
-   * @param path The uri of hdfs file.
+   * @param path The path of hdfs file, should be started with /
    * @param block Code block to execute.
    */
-  def withOutputStream[A](path: String)(block: FSDataOutputStream => A): A
+  def withOutputStream[A](path: Path)(block: FSDataOutputStream => A): A
 
   /**
    * Create an OutputStream at the indicated Path
-   * @param path The uri of hdfs file.
+   * @param path The path of hdfs file.
    */
-  def create(path: String): FSDataOutputStream
+  def create(path: Path): FSDataOutputStream
+
+  /**
+   * Execute a block of code, providing a HDFS file input stream. The stream will be
+   * closed after executing the code.
+   * @param path The path of hdfs file, should be started with /
+   * @param block Code block to execute.
+   */
+  def withInputStream[A](path: Path)(block: FSDataInputStream => A): A
+
+  /**
+   * Create an InputStream at the indicated Path
+   * @param path path of hdfs file.
+   */
+  def open(path: Path): FSDataInputStream
+
+
+  /**
+   * Return an instance of org.apache.hadoop.fs.FileSystem which you
+   * can do anything you want with.
+   */
+  def fileSystem: FileSystem
+
+  /**
+   * Renames Path src to Path dst.  Can take place on local fs
+   * or remote DFS.
+   */
+  def rename(src: Path, dst: Path): Boolean
 }
 
 private[hbase] class HDFileSystemApi(conf: Configuration) extends HDFSApi {
@@ -144,19 +196,36 @@ private[hbase] class HDFileSystemApi(conf: Configuration) extends HDFSApi {
   import org.apache.hadoop.conf.{Configuration => HadoopConf}
   import java.net._
 
-  lazy val urlOp: Option[String] = conf.getString("fs.default.name")
+  lazy val rootURIOp: Option[String] = conf.getString("fs.default.name")
 
   lazy val hdConfig = new HadoopConf()
 
-  def create(path: String): FSDataOutputStream = {
-    val user = conf.getString("fs.user").getOrElse("")
-    val url = new URI(urlOp.getOrElse(s"file://${System.getProperty("java.io.tmpdir")}"))
-    val fs = FileSystem.get(url, hdConfig, user)
-    fs.create(new Path(s"$url$path"), true)
+  lazy val rootURI = {
+    val uri = rootURIOp.getOrElse(System.getProperty("java.io.tmpdir"))
+    new URI(uri + (if (uri.endsWith(Path.SEPARATOR)) "" else Path.SEPARATOR))
   }
 
-  def withOutputStream[A](path: String)(block: FSDataOutputStream => A): A = {
+  lazy val hdfsUser = conf.getString("fs.user").getOrElse("")
+
+  lazy val hdfs = FileSystem.get(rootURI, hdConfig, hdfsUser)
+
+  lazy val root = new Path(rootURI)
+
+  def fileSystem: FileSystem = hdfs
+
+  def rename(src: Path, dst: Path) = hdfs.rename(root / src, root / dst)
+
+  def create(path: Path): FSDataOutputStream = hdfs.create(root / path, true)
+
+  def withOutputStream[A](path: Path)(block: FSDataOutputStream => A): A = {
     val ops = create(path)
+    try {block(ops)} finally {ops.close()}
+  }
+
+  def open(path: Path): FSDataInputStream = hdfs.open(root / path)
+
+  def withInputStream[A](path: Path)(block: FSDataInputStream => A): A = {
+    val ops = open(path)
     try {block(ops)} finally {ops.close()}
   }
 }
@@ -201,6 +270,7 @@ class HBasePlugin(app: Application) extends HBPlugin {
   }
 
   override def onStop() {
+    hdfsApi.fileSystem.close()
     Logger("play").info("HBase disconnected")
   }
 }

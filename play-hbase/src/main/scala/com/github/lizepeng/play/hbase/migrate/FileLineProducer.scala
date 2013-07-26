@@ -1,15 +1,16 @@
 package com.github.lizepeng.play.hbase.migrate
 
 import scala.io._
-import java.io.File
+import java.io._
 
 /**
  * @author zepeng.li@gmail.com
  */
-class FileLineProducer(path: String, name: String) extends LineProducer[String] {
+class FileLineProducer(is : InputStream, enc : String) extends LineProducer[String] {
   import LineProducer._
 
-  val file = Source.fromFile(new File(path, name))
+  val file = Source.fromInputStream(is, enc)
+
   val lines = file.getLines()
 
   def hasMore = lines.hasNext
