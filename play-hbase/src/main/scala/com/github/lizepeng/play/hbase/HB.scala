@@ -74,10 +74,18 @@ object HDFS {
   }
 
   /**
-   * Renames Path src to Path dst.  Can take place on local fs or remote DFS.
+   * Return an instance of org.apache.hadoop.fs.FileSystem which you
+   * can do anything you want with.
    */
-  def rename(src: Path, dst: Path)(implicit app: Application): Boolean = {
-    app.plugin[HBPlugin].map(_.hdfs.rename(src, dst)).getOrElse(error)
+  def fileSystem(implicit app: Application): FileSystem    ={
+    app.plugin[HBPlugin].map(_.hdfs.fileSystem).getOrElse(error)
+  }
+
+  /**
+   * Return the root path of current file system.
+   */
+  def root(implicit app: Application): Path = {
+    app.plugin[HBPlugin].map(_.hdfs.root).getOrElse(error)
   }
 }
 
@@ -177,7 +185,6 @@ trait HDFSApi {
    */
   def open(path: Path): FSDataInputStream
 
-
   /**
    * Return an instance of org.apache.hadoop.fs.FileSystem which you
    * can do anything you want with.
@@ -185,10 +192,9 @@ trait HDFSApi {
   def fileSystem: FileSystem
 
   /**
-   * Renames Path src to Path dst.  Can take place on local fs
-   * or remote DFS.
+   * Return the root path of current file system.
    */
-  def rename(src: Path, dst: Path): Boolean
+  def root: Path
 }
 
 private[hbase] class HDFileSystemApi(conf: Configuration) extends HDFSApi {
@@ -213,16 +219,14 @@ private[hbase] class HDFileSystemApi(conf: Configuration) extends HDFSApi {
 
   def fileSystem: FileSystem = hdfs
 
-  def rename(src: Path, dst: Path) = hdfs.rename(root / src, root / dst)
-
-  def create(path: Path): FSDataOutputStream = hdfs.create(root / path, true)
+  def create(path: Path): FSDataOutputStream = hdfs.create(path, true)
 
   def withOutputStream[A](path: Path)(block: FSDataOutputStream => A): A = {
     val ops = create(path)
     try {block(ops)} finally {ops.close()}
   }
 
-  def open(path: Path): FSDataInputStream = hdfs.open(root / path)
+  def open(path: Path): FSDataInputStream = hdfs.open(path)
 
   def withInputStream[A](path: Path)(block: FSDataInputStream => A): A = {
     val ops = open(path)
