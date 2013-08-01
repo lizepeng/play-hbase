@@ -86,6 +86,8 @@ package object hbase {
   }
 
   implicit class RichResult(val rlt: Result) extends AnyVal {
+    def isNullOrEmpty = rlt == null || rlt.isEmpty
+
     def apply[A](col: RColumn[A]): Option[A] =
       Option(rlt.getValue(col.family.name, col.name)).map(col.decode)
 

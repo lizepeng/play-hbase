@@ -2,10 +2,12 @@ package com.github.lizepeng.play.hbase
 
 import scala.collection.convert.WrapAsScala._
 import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.hbase.filter._
 import org.apache.hadoop.hbase.KeyValue
 import org.joda.time._
 import com.github.lizepeng.play.datetime.Calc._
 import play.api.Application
+import implicitConverters._
 
 /**
  * @author zepeng.li@gmail.com
@@ -48,8 +50,11 @@ trait WColumn[-A] {
   def encode(v: A): Array[Byte]
 
   def toText(v: A): String
-}
 
+  def singleColValFilter(v: A) = {
+    new SingleColumnValueFilter(family.name, name, CompareFilter.CompareOp.EQUAL, encode(v))
+  }
+}
 
 import play.api.libs.json._
 
@@ -106,4 +111,4 @@ trait TSRColumn[+A] extends RColumn[A] {
 abstract case class TSColumn[A](
   family: Family,
   name: String = ""
-  ) extends RWColumn[A] with TSRColumn[A]
+) extends RWColumn[A] with TSRColumn[A]
