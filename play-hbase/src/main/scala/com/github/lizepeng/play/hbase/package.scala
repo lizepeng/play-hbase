@@ -106,14 +106,14 @@ package object hbase {
       scan
     }
 
-    def apply[Any](cols: Set[RColumn[Any]]): Scan = {
+    def apply(cols: Set[RColumn[_]]): Scan = {
       cols.foreach {
         col => scan.addColumn(col.family.name, col.name)
       }
       scan
     }
 
-    def apply(cols: RColumn[Any]*): Scan = apply(cols.toSet)
+    def apply(cols: RColumn[_]*): Scan = apply(cols.toSet)
 
     def apply(fm: Family) = scan.addFamily(fm.name)
   }
