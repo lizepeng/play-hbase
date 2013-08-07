@@ -135,19 +135,12 @@ package object hbase {
   }
 
   implicit class RichHTable(val t: HTableInterface) extends AnyVal {
-    def increment(row: RowKey, counter: Column[Int]): Int = {
-      increment(row, counter, 1)
-    }
 
-    def increment(row: RowKey, counter: Column[Int], amount: Int): Int = {
+    def incr(row: RowKey, counter: Column[Int], amount: Int = 1): Int = {
       t.incrementColumnValue(row, counter.family, counter, amount).toInt
     }
 
-    def incrementL(row: RowKey, counter: Column[Long]): Long = {
-      incrementL(row, counter, 1L)
-    }
-
-    def incrementL(row: RowKey, counter: Column[Long], amount: Long): Long = {
+    def incrL(row: RowKey, counter: Column[Long], amount: Long = 1L): Long = {
       t.incrementColumnValue(row, counter.family, counter, amount)
     }
   }

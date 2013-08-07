@@ -30,22 +30,21 @@ abstract case class Column[A](family: Family, name: String = "") extends RWColum
 
 trait RWColumn[A] extends RColumn[A] with WColumn[A]
 
-trait RColumn[+A] {
+trait NamedColumn {
 
   val family: Family
 
   val name: String
+}
+
+trait RColumn[+A] extends NamedColumn{
 
   def decode(bytes: Array[Byte]): A
 
   def fromText(str: String): A
 }
 
-trait WColumn[-A] {
-
-  val family: Family
-
-  val name: String
+trait WColumn[-A] extends NamedColumn{
 
   def encode(v: A): Array[Byte]
 

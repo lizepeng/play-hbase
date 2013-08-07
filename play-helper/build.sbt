@@ -1,4 +1,4 @@
-name := "play-hbase"
+name := "play-helper"
 
 organization := "com.github.lizepeng"
 
@@ -11,7 +11,5 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 resolvers += "CDH4 repository" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
 
 libraryDependencies ++= Seq(
-  "com.github.lizepeng" %% "play-hbase-coproc" % "0.1.1",
-  "com.github.lizepeng" %% "play-helper" % "0.1.1",
   "play" %% "play" % "2.1.1" % "provided"
 )
