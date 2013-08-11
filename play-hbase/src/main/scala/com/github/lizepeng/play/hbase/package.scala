@@ -56,14 +56,14 @@ package object hbase {
   implicit class RichGet(val get: Get) extends AnyVal {
     def during(interval: Interval) = get.setTimeRange(interval.getStartMillis, interval.getEndMillis)
 
-    def apply[A <: RColumn[Any]](cs: Set[A]): Get = {
-      cs.foreach {
+    def apply(cols: Set[NamedColumn]): Get = {
+      cols.foreach {
         col => get.addColumn(col.family.name, col.name)
       }
       get
     }
 
-    def apply[A <: RColumn[Any]](cs: A*): Get = apply(cs.toSet)
+    def apply(cols: NamedColumn*): Get = apply(cols.toSet)
   }
 
   implicit class RichPut(val put: Put) extends AnyVal {
@@ -106,14 +106,14 @@ package object hbase {
       scan
     }
 
-    def apply(cols: Set[RColumn[_]]): Scan = {
+    def apply(cols: Set[NamedColumn]): Scan = {
       cols.foreach {
         col => scan.addColumn(col.family.name, col.name)
       }
       scan
     }
 
-    def apply(cols: RColumn[_]*): Scan = apply(cols.toSet)
+    def apply(cols: NamedColumn*): Scan = apply(cols.toSet)
 
     def apply(fm: Family) = scan.addFamily(fm.name)
   }
